@@ -40,6 +40,25 @@ labels, features = targetFeatureSplit(data)
 ### you'll need to use Pipelines. For more info:
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+
+features = StandardScaler().fit_transform(features)
+
+pca = PCA(n_components = 3)
+pca.fit(features)
+print(pca.explained_variance_ratio_)
+print()
+first_pc = pca.components_[0]
+second_pc = pca.components_[1]
+transformed_data = pca.transform(features)
+for ii, jj in zip(transformed_data, features):
+	plt.scatter(first_pc[0]*ii[0], first_pc[1]*ii[0], color = 'r')
+	plt.scatter(second_pc[0]*ii[1], second_pc[1]*ii[1], color = 'c')
+	plt.scatter(jj[0], jj[1], color = 'b')
+plt.show()
+
 # Provided to give you a starting point. Try a variety of classifiers.
 #from sklearn.naive_bayes import GaussianNB
 #clf = GaussianNB()
@@ -59,10 +78,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import StratifiedShuffleSplit
 
-# features_train, features_test, labels_train, labels_test = \
-	# train_test_split(features, labels, test_size=0.3, random_state=42)
-# clf.fit(features_train, labels_train)
-# predictions = clf.predict(features_test)
+features_train, features_test, labels_train, labels_test = \
+	train_test_split(features, labels, test_size=0.3, random_state=42)
+clf.fit(features_train, labels_train)
+predictions = clf.predict(features_test)
 #print(accuracy_score(labels_test, predictions))
 
 true_negatives = 0
@@ -70,36 +89,36 @@ false_negatives = 0
 true_positives = 0
 false_positives = 0
 
-cv = StratifiedShuffleSplit(n_splits = 50, test_size = 0.3, random_state = 42)
-for train_idx, test_idx in cv.split(features, labels): 
-	features_train = []
-	features_test  = []
-	labels_train   = []
-	labels_test	   = []
-	for ii in train_idx:
-		features_train.append( features[ii] )
-		labels_train.append( labels[ii] )
-	for jj in test_idx:
-		features_test.append( features[jj] )
-		labels_test.append( labels[jj] )
+# cv = StratifiedShuffleSplit(n_splits = 50, test_size = 0.3, random_state = 42)
+# for train_idx, test_idx in cv.split(features, labels): 
+	# features_train = []
+	# features_test  = []
+	# labels_train   = []
+	# labels_test	   = []
+	# for ii in train_idx:
+		# features_train.append( features[ii] )
+		# labels_train.append( labels[ii] )
+	# for jj in test_idx:
+		# features_test.append( features[jj] )
+		# labels_test.append( labels[jj] )
 		
-	clf.fit(features_train, labels_train)
-	predictions = clf.predict(features_test)
+	# clf.fit(features_train, labels_train)
+	# predictions = clf.predict(features_test)
 		
-	for prediction, truth in zip(predictions, labels_test):
-		if prediction == 0 and truth == 0:
-			true_negatives += 1
-		elif prediction == 0 and truth == 1:
-			false_negatives += 1
-		elif prediction == 1 and truth == 0:
-			false_positives += 1
-		elif prediction == 1 and truth == 1:
-			true_positives += 1
-		else:
-			print("Warning: Found a predicted label not == 0 or 1.")
-			print("All predictions should take value 0 or 1.")
-			print("Evaluating performance for processed predictions:")
-			break
+for prediction, truth in zip(predictions, labels_test):
+	if prediction == 0 and truth == 0:
+		true_negatives += 1
+	elif prediction == 0 and truth == 1:
+		false_negatives += 1
+	elif prediction == 1 and truth == 0:
+		false_positives += 1
+	elif prediction == 1 and truth == 1:
+		true_positives += 1
+	else:
+		print("Warning: Found a predicted label not == 0 or 1.")
+		print("All predictions should take value 0 or 1.")
+		print("Evaluating performance for processed predictions:")
+		break
 
 try:
 	total_predictions = true_negatives + false_negatives + false_positives + true_positives
